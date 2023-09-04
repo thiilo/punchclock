@@ -22,8 +22,14 @@
         #473335
         variablen noch setzen!!! */
 
-
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
+
+    html::-webkit-scrollbar {
+        display: none;
+    }
+    
 
     body {
         max-width: 600px;
@@ -165,7 +171,7 @@
             setInactive($('.project').not(element));
             setActive($(element));
         }
-        if ($('#remove').hasClass("active")) { remove(); }
+        if ($('#remove').hasClass("active")) { toggleDialogue("remove"); }
         loadStats();
     }
 
@@ -238,23 +244,21 @@
         }
     }
 
-    function remove() {
-        if ($('#remove').hasClass("active")) {
+    function toggleDialogue(selector) {
+        if ($('#' + selector).hasClass("active")) {
             //cancel
-            $('#remove').html("- remove current project");
-            $('.removeProject').addClass('hidden');
-            setInactive($('#remove'));
+            $('.' + selector).addClass('hidden');
+            setInactive($('#' + selector));
         } else {
-            setActive($('#remove'));
+            setActive($('#' + selector));
             //init
-            $('#remove').html("<i class='ph-bold ph-trash-simple'></i>sure you want to remove " + currentProject + "?");
-            $('.removeProject').removeClass('hidden');
+            $('.' + selector).removeClass('hidden');
         }
     }
 
     function deleteProject() {
         localStorage.removeItem(currentProject);
-        remove();
+        toggleDialogue('remove');
         $(".project.active").remove();
         if ($('#projectrow').children().length > 0) {
             changeProject($("#projectrow :first-child"));
@@ -267,6 +271,7 @@
     function saveNew() {
         var pstring = $('input[name="projectname"]').val();
         localStorage.setItem(pstring, "0");
+        session[pstring] = "0";
         var projectButton = '<span class="project active" onclick="changeProject(this)">' + pstring + '</span>';
         setInactive($('.project'));
         $('#projectrow').append(projectButton);
@@ -313,11 +318,22 @@
                 <p id="timetotal"> 00h 00m 00s spent in total</p>
             </div>
             <hr class="separator">
-            <p id="remove" class="inactive" onclick="remove()"><i class="ph-bold ph-trash-simple"></i>remove current project</p>
-            <button id="yes" class="hidden removeProject btn-small" onclick="deleteProject()">yep</button>
-            <button id="no" class="hidden removeProject btn-small" onclick="remove()">no</button>
-            <p id="reset" class="inactive" onclick="localStorage.setItem(currentProject, '0'); loadStats();"><i class="ph ph-arrow-counter-clockwise"></i>reset current project</p>
-            <p id="reset" class="inactive" onclick="localStorage.clear(); location.reload()"><i class="ph-bold ph-trash"></i>delete all projects</p>
+            
+            <p id="remove" class="inactive" onclick="toggleDialogue('remove')"><i class="ph-bold ph-trash-simple"></i>remove current project</p>
+            <p      class="hidden remove">Are you sure?</p>
+            <button class="hidden remove btn-small" onclick="deleteProject()">yep</button>
+            <button class="hidden remove btn-small" onclick="toggleDialogue('remove')">nope</button>
+            
+            <p id="reset" class="inactive" onclick="toggleDialogue('reset');"><i class="ph ph-arrow-counter-clockwise"></i>reset current project</p>
+            <p      class="hidden reset">Are you sure?</p>
+            <button class="hidden reset btn-small" onclick="localStorage.setItem(currentProject, '0'); session[currentProject] = '0'; loadStats(); toggleDialogue('reset');">yep</button>
+            <button class="hidden reset btn-small" onclick="toggleDialogue('reset')">nope</button>
+
+            <p id="delall" class="inactive" onclick="toggleDialogue('delall');"><i class="ph-bold ph-trash"></i>delete all projects</p>
+            <p      class="hidden delall">Are you sure?</p>
+            <button class="hidden delall btn-small" onclick="localStorage.clear(); location.reload(); toggleDialogue('delall');">yep</button>
+            <button class="hidden delall btn-small" onclick="toggleDialogue('delall')">nope</button>
+
         </div>
     </div>
 </body>
