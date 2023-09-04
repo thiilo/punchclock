@@ -10,10 +10,11 @@ projects and time spent are stored via `localStorage`, making the app as small a
 
 Icons are from [Phosphor Icons](https://phosphoricons.com/).
 
-## `development roadmap`
+## development roadmap
 
 As a personal project, `punchclock` is not too high on my agenda, but over time I'd like to add:
 
+- [ ] keyboard shortcuts
 - [ ] customized color schemes
 - [ ] A timing log, storing session lengths and enabling deeper statistics
 - [ ] Deeper Statistics
