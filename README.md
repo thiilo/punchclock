@@ -15,7 +15,6 @@ Icons are from [Phosphor Icons](https://phosphoricons.com/).
 As a personal project, `punchclock` is not too high on my agenda, but over time I'd like to add:
 
 - [ ] keyboard shortcuts
-- [ ] customized color schemes
 - [x] customized color schemes
 - [ ] A timing log, storing session lengths and enabling deeper statistics
 - [ ] Deeper Statistics
