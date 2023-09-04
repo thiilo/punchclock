@@ -16,6 +16,7 @@ As a personal project, `punchclock` is not too high on my agenda, but over time 
 
 - [ ] keyboard shortcuts
 - [ ] customized color schemes
+- [x] customized color schemes
 - [ ] A timing log, storing session lengths and enabling deeper statistics
 - [ ] Deeper Statistics
 	- [ ] time spent daily, weekly, monthly

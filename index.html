@@ -8,9 +8,24 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script type="text/javascript" src="jquery370.js"></script>
     <style type="text/css">
+
+    @media (prefers-color-scheme: light) {
+        :root {
+            --background: #c5e17a;
+            --color: #cc0055;
+        }
+    }    
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --background: #001524;
+            --color: #ffedc1;
+        }
+    }
+
     html {
-        background-color: #001524;
-        color: #ffecd1;
+        background-color: var(--background);
+        color: var(--color);
         font-family: monospace;
         font-size: 12pt;
         margin: 0;
@@ -36,7 +51,7 @@
         width: 100%;
         padding: 3em;
         margin: 3em;
-        border: 2px dashed #ffecd1;
+        border: 2px dashed var(--color);
     }
 
     h1,
@@ -56,8 +71,8 @@
         border: none;
         outline: none;
         border-bottom: 2px dashed #ffedc1;
-        background-color: #001524;
-        color: #ffecd1;
+        background-color: var(--background);
+        color: var(--color);
         font-family: monospace;
         font-size: 12pt;
     }
@@ -79,21 +94,21 @@
     }
 
     button {
-        background-color: #001524;
-        color: #ffecd1;
+        background-color: var(--background);
+        color: var(--color);
         font-family: monospace;
         font-size: 12pt;
         padding: 1em 2em;
         cursor: pointer;
-        border: 2px dashed #ffecd1;
+        border: 2px dashed var(--color);
         margin: 0 auto;
     }
 
     button:hover,
     .clicked {
-        background-color: #ffecd1;
-        color: #001524;
-        border: 2px dashed #001524;
+        background-color: var(--color);
+        color: var(--background);
+        border: 2px dashed var(--background);
     }
 
     .btn-small {
@@ -121,7 +136,7 @@
     .separator {
         width: 100%;
         border: none;
-        border-bottom: 2px dashed #ffecd1;
+        border-bottom: 2px dashed var(--color);
         padding: 0;
         margin: 1.5em 0;
     }
@@ -326,7 +341,7 @@
             <button class="hidden remove btn-small" onclick="deleteProject()">yep</button>
             <button class="hidden remove btn-small" onclick="toggleDialogue('remove')">nope</button>
             
-            <p id="reset" class="inactive" onclick="toggleDialogue('reset');"><i class="ph ph-arrow-counter-clockwise"></i>reset current project</p>
+            <p id="reset" class="inactive" onclick="toggleDialogue('reset');"><i class="ph-bold ph-arrow-counter-clockwise"></i>reset current project</p>
             <p      class="hidden reset">Are you sure?</p>
             <button class="hidden reset btn-small" onclick="localStorage.setItem(currentProject, '0'); session[currentProject] = '0'; loadStats(); toggleDialogue('reset');">yep</button>
             <button class="hidden reset btn-small" onclick="toggleDialogue('reset')">nope</button>
