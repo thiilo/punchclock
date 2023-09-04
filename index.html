@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>punchclock</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="sqlite3.wasm"></script>
     <script type="text/javascript" src="jquery370.js"></script>
     <style type="text/css">
     html {
@@ -16,8 +15,8 @@
         font-size: 12pt;
         margin: 0;
         display: flex;
-        justify-content: center;.
-
+        justify-content: center;
+        .
         /* alt-colors:
         #ffffc7
         #473335
@@ -27,8 +26,8 @@
     }
 
     body {
-    	aspect-ratio: 4/3;
         max-width: 600px;
+        width: 100%;
         padding: 3em;
         margin: 3em;
         border: 2px dashed #ffecd1;
@@ -44,7 +43,17 @@
     }
 
     i {
-    	padding-right: 8px;
+        padding-right: 8px;
+    }
+
+    input {
+        border: none;
+        outline: none;
+        border-bottom: 2px dashed #ffedc1;
+        background-color: #001524;
+        color: #ffecd1;
+        font-family: monospace;
+        font-size: 12pt;
     }
 
     .inactive {
@@ -54,6 +63,7 @@
 
     .inactive:hover {
         opacity: 100%;
+        cursor: pointer;
     }
 
     .buttoncontainer {
@@ -70,7 +80,7 @@
         padding: 1em 2em;
         cursor: pointer;
         border: 2px dashed #ffecd1;
-        margin: 1.5em auto 0 auto;
+        margin: 0 auto;
     }
 
     button:hover,
@@ -78,6 +88,16 @@
         background-color: #ffecd1;
         color: #001524;
         border: 2px dashed #001524;
+    }
+
+    .btn-small {
+        padding: .3em .6em;
+        margin: .3em;
+    }
+
+    #projectrow span {
+        display: inline-block;
+        padding-right: 1ch;
     }
 
     #timespent {
@@ -99,26 +119,35 @@
         padding: 0;
         margin: 1.5em 0;
     }
+
+    .ph-bold {
+        vertical-align: bottom;
+    }
     </style>
     <script type="text/javascript">
-	var start;
+    var start;
     var currentProject;
     var clockedIn = false;
+    const session = {};
 
     $(document).ready(function() {
-        currentProject = $('.active').text()
-        loadStats();
-        console.log('currentProject: ', currentProject)
+        if (!localStorage.length > 0) {
+            $(".hasProject").addClass("hidden");
+        } else {
+            loadProjects();
+            changeProject($("#projectrow :first-child"));
+            console.log('currentProject: ', currentProject)
+        }
 
-    	$('body').on('focus keydown', 'input[name="projectname"]', function(e) {
-    		if(e.code == "Space") {
-    			e.preventDefault();
-    			$('input["projectname"]').val($('input["projectname"]').val() + '-')
-    		}
-    	});
-
-        setInterval(updateTimeSpent, 1000);
-
+        $('body').on('focus keydown', $('input[name="projectname"]'), function(e) {
+            if (e.code == "Space") {
+                $('input[name="projectname"]').val($('input[name="projectname"]').val() + '-');
+                e.preventDefault();
+            } else if (e.code == "Enter") {
+                $('#save').click();
+                e.preventDefault();
+            }
+        });
     });
 
     function updateTimeSpent() {
@@ -128,85 +157,169 @@
             $('#timespent').text('spent ' + dateToString(diff) + ' on ' + currentProject);
         }
     }
-    
+
 
     function changeProject(element) {
-    	if(!$(element).hasClass("active")) {
-            console.log("changing project from " + currentProject + " to "+ $(element).text());
+        if (!$(element).hasClass("active")) {
             currentProject = $(element).text();
-            $('.project').not(element).removeClass('active');
-            $('.project').not(element).addClass('inactive');
-    		$(element).removeClass("inactive");
-    		$(element).addClass("active");
-    	}
-
+            setInactive($('.project').not(element));
+            setActive($(element));
+        }
+        if ($('#remove').hasClass("active")) { remove(); }
         loadStats();
     }
 
     function loadStats() {
-        $("#statheader").html('> stats for ' + currentProject)
+        $("#statheader").html('<i class="ph-bold ph-chart-bar"></i>stats for ' + currentProject);
+        $('#timesession').html(dateToString(parseInt(session[currentProject])) + " spent this session");
+        $('#timetotal').html(dateToString(parseInt(localStorage.getItem(currentProject))) + " spent in total");
+    }
+
+    function loadProjects() {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            var span = '<span class="project inactive" onclick="changeProject(this)">' + key + '</span>';
+            $('#projectrow').append(span);
+            session[key]="0";
+        }
     }
 
     function clockIn() {
-        currentProject = $(".active").text();
+        currentProject = $(".project.active").text();
         clockedIn = true;
         start = new Date();
-        console.log('started at', start);
         $('#start').html('clocked in...');
         $('#start').addClass('clicked');
         $('.project, #projectheader').addClass('hidden');
         $('#timespent').removeClass('hidden');
+        $('#timespent').text('spent ' + dateToString(0) + ' on ' + currentProject);
+        setInterval(updateTimeSpent, 1000);
         // if timespent has a value, remove it and start anew unless it is the same project. 
     }
 
     function clockOut() {
-        clockedIn = false;
-        end = new Date();
-        duration = end - start
-        console.log(duration)
-        $('#start').html('clock in');
-        $('#start').removeClass('clicked');
-        $('.project, #projectheader').removeClass('hidden');
+        if(clockedIn) {    
+            clockedIn = false;
+            end = new Date();
+            duration = end - start;
+            var previousDur = parseInt(localStorage.getItem(currentProject));
+            localStorage.setItem(currentProject, previousDur + duration);
+
+            previousDur = parseInt(session[currentProject]);
+            session[currentProject] = previousDur + duration;
+            loadStats();
+            $('#start').html('clock in');
+            $('#start').removeClass('clicked');
+            $('.project, #projectheader').removeClass('hidden');
+        }
     }
 
     function dateToString(ms) {
-            var hours = Math.floor(ms / (1000 * 60 * 60));
-            var minutes = Math.floor((ms / (1000 * 60)) % 60);
-            var seconds = Math.floor((ms / 1000) % 60);
+        var hours = Math.floor(ms / (1000 * 60 * 60));
+        var minutes = Math.floor((ms / (1000 * 60)) % 60);
+        var seconds = Math.floor((ms / 1000) % 60);
 
-            var hours = hours.toString().padStart(2, '0');
-            var minutes = minutes.toString().padStart(2, '0');
-            var seconds = seconds.toString().padStart(2, '0');
+        var hours = hours.toString().padStart(2, '0');
+        var minutes = minutes.toString().padStart(2, '0');
+        var seconds = seconds.toString().padStart(2, '0');
 
-            return timeSpent = hours + "h " + minutes + "m " + seconds + "s";
+        return timeSpent = hours + "h " + minutes + "m " + seconds + "s";
     }
 
+    function addNew() {
+        if ($('#addnew').hasClass("active")) {
+            $('input[name="projectname"]').val('');
+            $('.needsproject').addClass('hidden');
+            setInactive($('#addnew'));
+        } else {
+            setActive($('#addnew'));
+            $('.needsproject').removeClass('hidden');
+            $('input[name="projectname"]').focus();
+        }
+    }
+
+    function remove() {
+        if ($('#remove').hasClass("active")) {
+            //cancel
+            $('#remove').html("- remove current project");
+            $('.removeProject').addClass('hidden');
+            setInactive($('#remove'));
+        } else {
+            setActive($('#remove'));
+            //init
+            $('#remove').html("<i class='ph-bold ph-trash-simple'></i>sure you want to remove " + currentProject + "?");
+            $('.removeProject').removeClass('hidden');
+        }
+    }
+
+    function deleteProject() {
+        localStorage.removeItem(currentProject);
+        remove();
+        $(".project.active").remove();
+        if ($('#projectrow').children().length > 0) {
+            changeProject($("#projectrow :first-child"));
+        } else {
+            $(".hasProject").addClass("hidden");
+            addNew();
+        }
+    }
+
+    function saveNew() {
+        var pstring = $('input[name="projectname"]').val();
+        localStorage.setItem(pstring, "0");
+        var projectButton = '<span class="project active" onclick="changeProject(this)">' + pstring + '</span>';
+        setInactive($('.project'));
+        $('#projectrow').append(projectButton);
+        currentProject = $(".project.active").text();
+        loadStats();
+        addNew();
+        $(".hasProject").removeClass("hidden");
+    }
+
+    function setInactive(elem) {
+        elem.removeClass('active');
+        elem.addClass('inactive');
+    }
+
+    function setActive(elem) {
+        elem.removeClass('inactive');
+        elem.addClass('active');
+    }
     </script>
 </head>
 
 <body>
     <h1><i class="ph-bold ph-timer"></i>punchclock</h1><br>
-    <!--p class="inactive">+ add new project</p>
-    <input type="text" class="" name="projectname" hint="project name"></input-->
-    <p id="projectheader">> select project</p>
-    <span class="project inactive" onclick="changeProject(this)">project-1</span>
-    <span class="project active" onclick="changeProject(this)">project-2</span>
-    <span class="project inactive" onclick="changeProject(this)">project-3</span>
-    <span class="project inactive" onclick="changeProject(this)">project-4</span>
-    <span class="project inactive" onclick="changeProject(this)">project-5</span>
-    </hr>
-    <div class="buttoncontainer">
-        <button id="start" onclick="clockIn()">clock in</button>
-        <button id="stop" onclick="clockOut()">clock out</button>
-    </div>
-    <p id="timespent" class="hidden">spent 00h 00m 00s on {project-2}</p>
-    <hr class="separator">
-    <p id="statheader">> stats for {project-2}
-        <div class="tabbed">
-            <p id="goal">time goal: 00h 00m 00s (remaining: 00h 00m 00s)</p>
-            <p id="timetotalmonth"> 00h 00m 00s spent this month</p>
-            <p id="timetotal"> 00h 00m 00s spent in total</p>
+    <p id="addnew" class="inactive" onclick="addNew()">+ add new project</p>
+    <input type="text" class="hidden needsproject" name="projectname" hint="project name"></input>
+    <button id="save" class="hidden needsproject btn-small" onclick="saveNew()">save</button>
+    <div class="hasProject">
+        <p id="projectheader">> select project</p>
+        <div id="projectrow">
         </div>
+        <div class="onCurrent">
+            <hr class="separator">
+            <div class="buttoncontainer">
+                <button id="start" onclick="clockIn()">clock in</button>
+                <button id="stop" onclick="clockOut()">clock out</button>
+            </div>
+            <p id="timespent" class="hidden">spent 00h 00m 00s on {project-2}</p>
+            <hr class="separator">
+            <p id="statheader"><i class="ph-bold ph-chart-bar"></i>stats for {project-2}</p>
+            <div class="tabbed">
+                <p id="goal" class="hidden">time goal: 00h 00m 00s (remaining: 00h 00m 00s)</p>
+                <p id="timetotalmonth" class="hidden"> 00h 00m 00s spent this month</p>
+                <p id="timesession"> 00h 00m 00s spent this session</p>
+                <p id="timetotal"> 00h 00m 00s spent in total</p>
+            </div>
+            <hr class="separator">
+            <p id="remove" class="inactive" onclick="remove()"><i class="ph-bold ph-trash-simple"></i>remove current project</p>
+            <button id="yes" class="hidden removeProject btn-small" onclick="deleteProject()">yep</button>
+            <button id="no" class="hidden removeProject btn-small" onclick="remove()">no</button>
+            <p id="reset" class="inactive" onclick="localStorage.setItem(currentProject, '0'); loadStats();"><i class="ph ph-arrow-counter-clockwise"></i>reset current project</p>
+            <p id="reset" class="inactive" onclick="localStorage.clear(); location.reload()"><i class="ph-bold ph-trash"></i>delete all projects</p>
+        </div>
+    </div>
 </body>
 
 </html>
