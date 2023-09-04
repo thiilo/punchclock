@@ -196,7 +196,7 @@
         start = new Date();
         $('#start').html('clocked in...');
         $('#start').addClass('clicked');
-        $('.project, #projectheader').addClass('hidden');
+        $('.project, #projectheader, #addnew').addClass('hidden');
         $('#timespent').removeClass('hidden');
         $('#timespent').text('spent ' + dateToString(0) + ' on ' + currentProject);
         setInterval(updateTimeSpent, 1000);
@@ -216,7 +216,7 @@
             loadStats();
             $('#start').html('clock in');
             $('#start').removeClass('clicked');
-            $('.project, #projectheader').removeClass('hidden');
+            $('.project, #projectheader, #addnew').removeClass('hidden');
         }
     }
 
@@ -294,6 +294,8 @@
 </head>
 
 <body>
+    <div class="modal hidden">
+    </div>
     <h1><i class="ph-bold ph-timer"></i>punchclock</h1><br>
     <p id="addnew" class="inactive" onclick="addNew()">+ add new project</p>
     <input type="text" class="hidden needsproject" name="projectname" hint="project name"></input>
