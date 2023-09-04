@@ -26,7 +26,7 @@
     html {
         background-color: var(--background);
         color: var(--color);
-        font-family: monospace;
+        font-family: "Menlo", monospace;
         font-size: 12pt;
         margin: 0;
         display: flex;
@@ -65,6 +65,10 @@
 
     i {
         padding-right: 8px;
+    }
+
+    .nopad {
+        padding: 0;
     }
 
     input {
@@ -161,8 +165,8 @@
         }
 
         $('body').on('focus keydown', function(e) {
-            if (e.code == "Space" && $('input[name="projectname"]').is(':focus')) {
-                $('input[name="projectname"]').val($('input[name="projectname"]').val() + '-');
+            if (e.code == "Space" && ($('input[name="projectname"]').is(':focus') || $('input[name="editProject"]').is(':focus'))) {
+                ($('input[name="projectname"]').is(':focus')) ? $('input[name="projectname"]').val($('input[name="projectname"]').val() + '-') : $('input[name="editProject"]').val($('input[name="editProject"]').val() + '-');
                 e.preventDefault();
             } else if (e.code == "Space") {
                 e.preventDefault();
@@ -222,7 +226,7 @@
         $('#start').addClass('clicked');
         $('#stop').html('clock out');
         $('#stop').removeClass('clicked');
-        $('.project, #projectheader, #addnew, #actions, #projectrow, #sep1').addClass('hidden');
+        $('.project, #projectheader, #addnew, #actions, #projectrow, #sep1, .needsproject, .reset, .remove, .delall, #edit, .edit').addClass('hidden');
         $('#timespent').removeClass('hidden');
         $('#timespent').text('spent ' + dateToString(0) + ' on ' + currentProject);
         setInterval(updateTimeSpent, 1000);
@@ -244,7 +248,7 @@
             $('#stop').addClass('clicked');
             $('#start').html('clock in');
             $('#start').removeClass('clicked');
-            $('.project, #projectheader, #addnew, #actions, #projectrow, #sep1').removeClass('hidden');
+            $('.project, #projectheader, #addnew, #actions, #projectrow, #sep1, #edit').removeClass('hidden');
         }
     }
 
@@ -309,6 +313,18 @@
         $(".hasProject").removeClass("hidden");
     }
 
+    function saveEdit() {
+        var newKey = $('input[name="editProject"]').val();
+        localStorage.setItem(newKey, localStorage.getItem(currentProject));
+        session[newKey] = session[currentProject];
+        $('#projectrow').append(newKey);
+        deleteProject();
+        changeProject(newKey);
+        currentProject = newKey;
+        loadStats();
+        toggleDialogue('edit');
+    }
+
     function setInactive(elem) {
         elem.removeClass('active');
         elem.addClass('inactive');
@@ -328,9 +344,19 @@
     <p id="addnew" class="inactive" onclick="addNew()">+ add new project</p>
     <input type="text" class="hidden needsproject" name="projectname" hint="project name"></input>
     <button id="save" class="hidden needsproject btn-small" onclick="saveNew()">save</button>
+    <p id="edit" class="inactive" onclick="toggleDialogue('edit');"><i class="ph-bold ph-wrench"></i>edit project</p>
+    <div class="edit row hidden tabbed">
+        name: <input type="text" name="editProject"></input>
+        <button id="saveEdit" class="btn-small" onclick="saveEdit()"><i class="nopad ph-bold ph-arrows-counter-clockwise"></i></button>
+    </div>
+    <div class="edit row hidden tabbed">
+        duration: <input type="number" name="editDur"></input>
+        <button id="setDur" class="btn-small" onclick=""><i class="nopad ph-bold ph-arrows-counter-clockwise"></i></button>
+        <button id="addDur" class="btn-small" onclick="">+</button>
+    </div>
     <div class="hasProject">
         <p id="projectheader">> select project</p>
-        <div id="projectrow">
+        <div id="projectrow" class="tabbed">
         </div>
         <div class="onCurrent">
             <hr class="separator">
