@@ -32,6 +32,10 @@ As a personal project, `punchclock` is not too high on my agenda, but over time 
 - [x] Editing
 	- [x] edit titles
 	- [x] edit time
+- [ ] nested projects (`work/project1` adds to `work` as well)
+- [ ] settings for:
+	- [ ] themes and theme colors
+	- [ ] custom shortcuts
 - [ ] a timing log that stores session lengths and enables deeper statistics
 - [ ] Deeper Statistics
 	- [ ] time spent daily, weekly, monthly
