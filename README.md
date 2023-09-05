@@ -11,6 +11,7 @@ Add a project, clock in, and when you're done, clock out.
 - `Ctrl` + `A` to open `+ Add Project` dialogue
 - `Esc` and `Enter` to cancel and save new project
 - `Space` to clock in/clock out
+- `Ctrl` + `C` to open Launcher and type a project to clock into (and create)
 
 ### Additional Info
 
@@ -24,10 +25,13 @@ Icons are from [Phosphor Icons](https://phosphoricons.com/), the preffered font 
 As a personal project, `punchclock` is not too high on my agenda, but over time I'd like to add:
 
 - [x] keyboard shortcuts
+- [ ] launcher
+	- [x] basic launcher
+	- [ ] project list, navigable by `↑` and `↓`.
 - [x] customized color schemes
-- [ ] Editing
+- [x] Editing
 	- [x] edit titles
-	- [ ] edit time
+	- [x] edit time
 - [ ] a timing log that stores session lengths and enables deeper statistics
 - [ ] Deeper Statistics
 	- [ ] time spent daily, weekly, monthly

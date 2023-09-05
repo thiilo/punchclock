@@ -8,17 +8,18 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script type="text/javascript" src="jquery370.js"></script>
     <style type="text/css">
-
     @media (prefers-color-scheme: light) {
         :root {
             --background: #c5e17a;
+            --modal: #00000040;
             --color: #cc0055;
         }
-    }    
+    }
 
     @media (prefers-color-scheme: dark) {
         :root {
             --background: #001524;
+            --modal: #00000090;
             --color: #ffedc1;
         }
     }
@@ -44,12 +45,68 @@
     html::-webkit-scrollbar {
         display: none;
     }
-    
+
+    .modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--modal);
+        z-index: 80;
+    }
+
+    #launcher {
+        position: relative;
+        top: 35%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        height: 41px;
+        padding: 15px 15px;
+        border: 2px dashed var(--color);
+        background-color: var(--background);
+    }
+
+    #launcherAction {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        font-size: 12pt;
+    }
+
+    #launcherText {
+        font-family: "Menlo", monospace;
+        background-color: inherit;
+        /*margin-right: 15px;*/
+        width: 60%;
+        height: 100%;
+        font-size: 14pt;
+        border: none;
+    }
+
+    kbd {
+        font-family: "Menlo", monospace;
+        background-color: #ccc;
+        color: black;
+        padding: .3rem .6rem;
+        border: .2rem solid #888;
+        /*border-top: .2rem solid #ccc;*/
+        border-bottom: .6rem solid #888;
+        border-radius: 5px;
+        transition: all .1s ease;
+    }
+
+    kbd:hover {
+        /*transform: translateX(6px);*/
+        border-bottom: 3px solid #888;
+    }
 
     body {
         max-width: 600px;
         width: 100%;
         padding: 3em;
+        padding-bottom: 1.5em;
         margin: 3em;
         border: 2px dashed var(--color);
     }
@@ -74,11 +131,16 @@
     input {
         border: none;
         outline: none;
-        border-bottom: 2px dashed #ffedc1;
+        border-bottom: 2px dashed var(--color);
         background-color: var(--background);
         color: var(--color);
-        font-family: monospace;
+        font-family: "Menlo", monospace;
         font-size: 12pt;
+    }
+
+    ::placeholder {
+        color: var(--color);
+        opacity: 40%;
     }
 
     .inactive {
@@ -145,8 +207,17 @@
         margin: 1.5em 0;
     }
 
+    .footer {
+        font-size: 7pt;
+        text-align: center;
+    }
+
+    .footer a {
+        color: var(--color);
+    }
+
     .ph-bold {
-        vertical-align: bottom;
+        vertical-align: inherit;
     }
     </style>
     <script type="text/javascript">
@@ -154,6 +225,7 @@
     var currentProject;
     var clockedIn = false;
     const session = {};
+    var isNew = false;
 
     $(document).ready(function() {
         if (!localStorage.length > 0) {
@@ -165,21 +237,69 @@
         }
 
         $('body').on('focus keydown', function(e) {
-            if (e.code == "Space" && ($('input[name="projectname"]').is(':focus') || $('input[name="editProject"]').is(':focus'))) {
-                ($('input[name="projectname"]').is(':focus')) ? $('input[name="projectname"]').val($('input[name="projectname"]').val() + '-') : $('input[name="editProject"]').val($('input[name="editProject"]').val() + '-');
+
+            // Space
+            if (e.code == "Space" && $(':focus').is('input')) {
                 e.preventDefault();
+                var focusedInput = $(':focus');
+                focusedInput.val(focusedInput.val() + '-');
             } else if (e.code == "Space") {
                 e.preventDefault();
-                ($('#start').hasClass('clicked')) ? $('#stop').click() : $('#start').click();
+                ($('#start').hasClass('clicked')) ? $('#stop').click(): $('#start').click();
                 e.preventDefault();
             }
+
+            // Launcher
+            if ((e.ctrlKey && (e.key == 'c' || e.key == 'C')) && $('.modal').hasClass('hidden')) {
+                e.preventDefault();
+                $('.modal').removeClass('hidden');
+                $('#launcherText').focus();
+            }
+
+            if (($('#launcherText').is(':focus') && e.key == 'Escape')) {
+                e.preventDefault();
+                $('.modal').addClass('hidden');
+                $('#launcherText').val('');
+            }
+
+            // close AddNew with Esc
             if ((e.ctrlKey && (e.key == 'a' || e.key == 'A')) || ($('input[name="projectname"]').is(':focus') && e.key == 'Escape')) {
                 e.preventDefault();
                 addNew();
             }
+
+            // submit Form with Enter
             if (e.code == "Enter" && $('input[name="projectname"]').is(':focus')) {
                 $('#save').click();
                 e.preventDefault();
+            } else if (e.code == "Enter" && $('#launcherText').is(':focus')) {
+                e.preventDefault();
+                $('#launcherAction').mouseover();
+            }
+        });
+
+        $('#launcherText').on('focus keyup', function(e) {
+            var input = $('#launcherText').val();
+            
+            if (e.code == "Enter") {
+                // dependent on button status, save and start or just start
+                if(isNew) {
+                    saveNew(input);
+                } else {
+                    changeProject($('.project:contains(' + input + ')'));
+                }
+                $('#launcherText').val('');
+                $('.modal').addClass('hidden');
+                $('#start').click();
+
+            } else {
+                if (input in localStorage) {
+                    isNew = false;
+                    $('#launcherAction').html('clock in <i class="nopad ph-bold ph-arrow-elbow-down-left"></i>');
+                } else {
+                    isNew = true;
+                    $('#launcherAction').html('+ add new and clock in <i class="nopad ph-bold ph-arrow-elbow-down-left"></i>');
+                }
             }
         });
     });
@@ -191,7 +311,6 @@
             $('#timespent').text('spent ' + dateToString(diff) + ' on ' + currentProject);
         }
     }
-
 
     function changeProject(element) {
         if (!$(element).hasClass("active")) {
@@ -214,7 +333,7 @@
             const key = localStorage.key(i);
             var span = '<span class="project inactive" onclick="changeProject(this)">' + key + '</span>';
             $('#projectrow').append(span);
-            session[key]="0";
+            session[key] = "0";
         }
     }
 
@@ -234,7 +353,7 @@
     }
 
     function clockOut() {
-        if(clockedIn) {    
+        if (clockedIn) {
             clockedIn = false;
             end = new Date();
             duration = end - start;
@@ -300,28 +419,47 @@
         }
     }
 
-    function saveNew() {
-        var pstring = $('input[name="projectname"]').val();
-        localStorage.setItem(pstring, "0");
-        session[pstring] = "0";
-        var projectButton = '<span class="project active" onclick="changeProject(this)">' + pstring + '</span>';
+    function saveNew(name) {
+        localStorage.setItem(name, "0");
+        session[name] = "0";
+        var projectButton = '<span class="project active" onclick="changeProject(this)">' + name + '</span>';
         setInactive($('.project'));
         $('#projectrow').append(projectButton);
         currentProject = $(".project.active").text();
         loadStats();
-        addNew();
         $(".hasProject").removeClass("hidden");
     }
 
     function saveEdit() {
         var newKey = $('input[name="editProject"]').val();
+
         localStorage.setItem(newKey, localStorage.getItem(currentProject));
         session[newKey] = session[currentProject];
-        $('#projectrow').append(newKey);
-        deleteProject();
-        changeProject(newKey);
-        currentProject = newKey;
+        var projectObj = '<span class="project active" onclick="changeProject(this)">' + newKey + '</span>';
+        localStorage.removeItem(currentProject);
+        $(".project.active").remove();
+        $('#projectrow').append(projectObj);
+        currentProject = $(".project.active").text();
         loadStats();
+        $('.edit').val('');
+        toggleDialogue('edit');
+    }
+
+    function addDur(){
+        var duration = parseInt($('#editDur').val()) * 60 * 1000;
+        var previousDur = parseInt(localStorage.getItem(currentProject));
+        var newDur = previousDur + duration;
+        localStorage.setItem(currentProject, newDur);
+        loadStats();
+        $('.edit').val('');
+        toggleDialogue('edit');
+    }
+    
+    function setDur(){
+        var duration = parseInt($('#editDur').val()) * 60 * 1000;
+        localStorage.setItem(currentProject, duration);
+        loadStats();
+        $('.edit').val('');
         toggleDialogue('edit');
     }
 
@@ -339,24 +477,28 @@
 
 <body>
     <div class="modal hidden">
+        <div id="launcher">
+            <input type="text" id="launcherText" placeholder="Add new project or clock in...">
+            <kbd id="launcherAction">add new and clock in <i class="nopad ph-bold ph-arrow-elbow-down-left"></i></kbd>
+        </div>
     </div>
     <h1><i class="ph-bold ph-timer"></i>punchclock</h1><br>
     <p id="addnew" class="inactive" onclick="addNew()">+ add new project</p>
-    <input type="text" class="hidden needsproject" name="projectname" hint="project name"></input>
-    <button id="save" class="hidden needsproject btn-small" onclick="saveNew()">save</button>
-    <p id="edit" class="inactive" onclick="toggleDialogue('edit');"><i class="ph-bold ph-wrench"></i>edit project</p>
-    <div class="edit row hidden tabbed">
-        name: <input type="text" name="editProject"></input>
-        <button id="saveEdit" class="btn-small" onclick="saveEdit()"><i class="nopad ph-bold ph-arrows-counter-clockwise"></i></button>
-    </div>
-    <div class="edit row hidden tabbed">
-        duration: <input type="number" name="editDur"></input>
-        <button id="setDur" class="btn-small" onclick=""><i class="nopad ph-bold ph-arrows-counter-clockwise"></i></button>
-        <button id="addDur" class="btn-small" onclick="">+</button>
-    </div>
+    <input type="text" id="newName" class="hidden needsproject" name="projectname" hint="project name"></input>
+    <button id="save" class="hidden needsproject btn-small" onclick="saveNew($('#newName').val()); addNew();">save</button>
     <div class="hasProject">
-        <p id="projectheader">> select project</p>
-        <div id="projectrow" class="tabbed">
+        <p id="edit" class="inactive" onclick="toggleDialogue('edit');"><i class="ph-bold ph-wrench"></i>edit project</p>
+        <div class="edit row hidden tabbed">
+            name: <input type="text" name="editProject" class="edit"></input>
+            <button id="saveEdit" class="btn-small" onclick="saveEdit()"><i class="nopad ph-bold ph-arrows-counter-clockwise"></i></button>
+        </div>
+        <div class="edit row hidden tabbed">
+            duration (min): <input type="number" id="editDur" class="edit"></input>
+            <button id="setDur" class="btn-small" onclick="setDur()"><i class="nopad ph-bold ph-arrows-counter-clockwise"></i></button>
+            <button id="addDur" class="btn-small" onclick="addDur()">+</button>
+        </div>
+        <p id="projectheader" class="active" onclick="toggleDialogue('projectheader')">> select project</p>
+        <div id="projectrow" class="tabbed projectheader">
         </div>
         <div class="onCurrent">
             <hr class="separator">
@@ -375,24 +517,26 @@
             </div>
             <div id="actions">
                 <hr class="separator">
-                
                 <p id="remove" class="inactive" onclick="toggleDialogue('remove')"><i class="ph-bold ph-trash-simple"></i>remove current project</p>
-                <p      class="hidden remove">Are you sure?</p>
+                <p class="hidden remove">Are you sure?</p>
                 <button class="hidden remove btn-small" onclick="deleteProject()">yep</button>
                 <button class="hidden remove btn-small" onclick="toggleDialogue('remove')">nope</button>
-                
                 <p id="reset" class="inactive" onclick="toggleDialogue('reset');"><i class="ph-bold ph-arrow-counter-clockwise"></i>reset current project</p>
-                <p      class="hidden reset">Are you sure?</p>
+                <p class="hidden reset">Are you sure?</p>
                 <button class="hidden reset btn-small" onclick="localStorage.setItem(currentProject, '0'); session[currentProject] = '0'; loadStats(); toggleDialogue('reset');">yep</button>
                 <button class="hidden reset btn-small" onclick="toggleDialogue('reset')">nope</button>
-
                 <p id="delall" class="inactive" onclick="toggleDialogue('delall');"><i class="ph-bold ph-trash"></i>delete all projects</p>
-                <p      class="hidden delall">Are you sure?</p>
+                <p class="hidden delall">Are you sure?</p>
                 <button class="hidden delall btn-small" onclick="localStorage.clear(); location.reload(); toggleDialogue('delall');">yep</button>
                 <button class="hidden delall btn-small" onclick="toggleDialogue('delall')">nope</button>
             </div>
         </div>
     </div>
+    <br>
+    <p class="footer">
+        <b>v1.3</b>
+        <br>
+        created by <a href="https://github.com/thiilo">thilo</a>, 2023.</p>
 </body>
 
 </html>
