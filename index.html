@@ -62,6 +62,7 @@
         left: 50%;
         transform: translate(-50%, -50%);
         width: 80%;
+        max-width: 700px;
         height: 41px;
         padding: 15px 15px;
         border: 2px dashed var(--color);
@@ -103,12 +104,21 @@
     }
 
     body {
-        max-width: 600px;
+        display: flex;
+        /*justify-content: center;*/
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .centered {
         width: 100%;
-        padding: 3em;
-        padding-bottom: 1.5em;
+        max-width: 600px;
         margin: 3em;
         border: 2px dashed var(--color);
+        padding-bottom: 1.5em;
+        padding: 3em;
+
     }
 
     h1,
@@ -280,10 +290,10 @@
 
         $('#launcherText').on('focus keyup', function(e) {
             var input = $('#launcherText').val();
-            
+
             if (e.code == "Enter") {
                 // dependent on button status, save and start or just start
-                if(isNew) {
+                if (isNew) {
                     saveNew(input);
                 } else {
                     changeProject($('.project:contains(' + input + ')'));
@@ -445,7 +455,7 @@
         toggleDialogue('edit');
     }
 
-    function addDur(){
+    function addDur() {
         var duration = parseInt($('#editDur').val()) * 60 * 1000;
         var previousDur = parseInt(localStorage.getItem(currentProject));
         var newDur = previousDur + duration;
@@ -454,8 +464,8 @@
         $('.edit').val('');
         toggleDialogue('edit');
     }
-    
-    function setDur(){
+
+    function setDur() {
         var duration = parseInt($('#editDur').val()) * 60 * 1000;
         localStorage.setItem(currentProject, duration);
         loadStats();
@@ -476,67 +486,70 @@
 </head>
 
 <body>
-    <div class="modal hidden">
-        <div id="launcher">
-            <input type="text" id="launcherText" placeholder="Add new project or clock in...">
-            <kbd id="launcherAction">add new and clock in <i class="nopad ph-bold ph-arrow-elbow-down-left"></i></kbd>
-        </div>
-    </div>
-    <h1><i class="ph-bold ph-timer"></i>punchclock</h1><br>
-    <p id="addnew" class="inactive" onclick="addNew()">+ add new project</p>
-    <input type="text" id="newName" class="hidden needsproject" name="projectname" hint="project name"></input>
-    <button id="save" class="hidden needsproject btn-small" onclick="saveNew($('#newName').val()); addNew();">save</button>
-    <div class="hasProject">
-        <p id="edit" class="inactive" onclick="toggleDialogue('edit');"><i class="ph-bold ph-wrench"></i>edit project</p>
-        <div class="edit row hidden tabbed">
-            name: <input type="text" name="editProject" class="edit"></input>
-            <button id="saveEdit" class="btn-small" onclick="saveEdit()"><i class="nopad ph-bold ph-arrows-counter-clockwise"></i></button>
-        </div>
-        <div class="edit row hidden tabbed">
-            duration (min): <input type="number" id="editDur" class="edit"></input>
-            <button id="setDur" class="btn-small" onclick="setDur()"><i class="nopad ph-bold ph-arrows-counter-clockwise"></i></button>
-            <button id="addDur" class="btn-small" onclick="addDur()">+</button>
-        </div>
-        <p id="projectheader" class="active" onclick="toggleDialogue('projectheader')">> select project</p>
-        <div id="projectrow" class="tabbed projectheader">
-        </div>
-        <div class="onCurrent">
-            <hr class="separator">
-            <div class="buttoncontainer">
-                <button id="start" onclick="clockIn()">clock in</button>
-                <button id="stop" onclick="clockOut()">clock out</button>
+    <div class="centered">
+        <div class="modal hidden">
+            <div id="launcher">
+                <input type="text" id="launcherText" placeholder="Add new project or clock in...">
+                <kbd id="launcherAction">add new and clock in <i class="nopad ph-bold ph-arrow-elbow-down-left"></i></kbd>
             </div>
-            <p id="timespent" class="hidden">spent 00h 00m 00s on {project-2}</p>
-            <hr class="separator">
-            <p id="statheader"><i class="ph-bold ph-chart-bar"></i>stats for {project-2}</p>
-            <div class="tabbed">
-                <p id="goal" class="hidden">time goal: 00h 00m 00s (remaining: 00h 00m 00s)</p>
-                <p id="timetotalmonth" class="hidden"> 00h 00m 00s spent this month</p>
-                <p id="timesession"> 00h 00m 00s spent this session</p>
-                <p id="timetotal"> 00h 00m 00s spent in total</p>
+        </div>
+        <h1><i class="ph-bold ph-timer"></i>punchclock</h1><br>
+        <p id="addnew" class="inactive" onclick="addNew()">+ add new project</p>
+        <input type="text" id="newName" class="hidden needsproject" name="projectname" hint="project name"></input>
+        <button id="save" class="hidden needsproject btn-small" onclick="saveNew($('#newName').val()); addNew();">save</button>
+        <div class="hasProject">
+            <p id="edit" class="inactive" onclick="toggleDialogue('edit');"><i class="ph-bold ph-wrench"></i>edit project</p>
+            <div class="edit row hidden tabbed">
+                name: <input type="text" name="editProject" class="edit"></input>
+                <button id="saveEdit" class="btn-small" onclick="saveEdit()"><i class="nopad ph-bold ph-arrows-counter-clockwise"></i></button>
             </div>
-            <div id="actions">
+            <div class="edit row hidden tabbed">
+                duration (min): <input type="number" id="editDur" class="edit"></input>
+                <button id="setDur" class="btn-small" onclick="setDur()"><i class="nopad ph-bold ph-arrows-counter-clockwise"></i></button>
+                <button id="addDur" class="btn-small" onclick="addDur()">+</button>
+            </div>
+            <p id="projectheader" class="active" onclick="toggleDialogue('projectheader')">> select project</p>
+            <div id="projectrow" class="tabbed projectheader">
+            </div>
+            <div class="onCurrent">
                 <hr class="separator">
-                <p id="remove" class="inactive" onclick="toggleDialogue('remove')"><i class="ph-bold ph-trash-simple"></i>remove current project</p>
-                <p class="hidden remove">Are you sure?</p>
-                <button class="hidden remove btn-small" onclick="deleteProject()">yep</button>
-                <button class="hidden remove btn-small" onclick="toggleDialogue('remove')">nope</button>
-                <p id="reset" class="inactive" onclick="toggleDialogue('reset');"><i class="ph-bold ph-arrow-counter-clockwise"></i>reset current project</p>
-                <p class="hidden reset">Are you sure?</p>
-                <button class="hidden reset btn-small" onclick="localStorage.setItem(currentProject, '0'); session[currentProject] = '0'; loadStats(); toggleDialogue('reset');">yep</button>
-                <button class="hidden reset btn-small" onclick="toggleDialogue('reset')">nope</button>
-                <p id="delall" class="inactive" onclick="toggleDialogue('delall');"><i class="ph-bold ph-trash"></i>delete all projects</p>
-                <p class="hidden delall">Are you sure?</p>
-                <button class="hidden delall btn-small" onclick="localStorage.clear(); location.reload(); toggleDialogue('delall');">yep</button>
-                <button class="hidden delall btn-small" onclick="toggleDialogue('delall')">nope</button>
+                <div class="buttoncontainer">
+                    <button id="start" onclick="clockIn()">clock in</button>
+                    <button id="stop" onclick="clockOut()">clock out</button>
+                </div>
+                <p id="timespent" class="hidden">spent 00h 00m 00s on {project-2}</p>
+                <hr class="separator">
+                <p id="statheader"><i class="ph-bold ph-chart-bar"></i>stats for {project-2}</p>
+                <div class="tabbed">
+                    <p id="goal" class="hidden">time goal: 00h 00m 00s (remaining: 00h 00m 00s)</p>
+                    <p id="timetotalmonth" class="hidden"> 00h 00m 00s spent this month</p>
+                    <p id="timesession"> 00h 00m 00s spent this session</p>
+                    <p id="timetotal"> 00h 00m 00s spent in total</p>
+                </div>
+                <div id="actions">
+                    <hr class="separator">
+                    <p id="remove" class="inactive" onclick="toggleDialogue('remove')"><i class="ph-bold ph-trash-simple"></i>remove current project</p>
+                    <p class="hidden remove">Are you sure?</p>
+                    <button class="hidden remove btn-small" onclick="deleteProject()">yep</button>
+                    <button class="hidden remove btn-small" onclick="toggleDialogue('remove')">nope</button>
+                    <p id="reset" class="inactive" onclick="toggleDialogue('reset');"><i class="ph-bold ph-arrow-counter-clockwise"></i>reset current project</p>
+                    <p class="hidden reset">Are you sure?</p>
+                    <button class="hidden reset btn-small" onclick="localStorage.setItem(currentProject, '0'); session[currentProject] = '0'; loadStats(); toggleDialogue('reset');">yep</button>
+                    <button class="hidden reset btn-small" onclick="toggleDialogue('reset')">nope</button>
+                    <p id="delall" class="inactive" onclick="toggleDialogue('delall');"><i class="ph-bold ph-trash"></i>delete all projects</p>
+                    <p class="hidden delall">Are you sure?</p>
+                    <button class="hidden delall btn-small" onclick="localStorage.clear(); location.reload(); toggleDialogue('delall');">yep</button>
+                    <button class="hidden delall btn-small" onclick="toggleDialogue('delall')">nope</button>
+                </div>
             </div>
         </div>
-    </div>
-    <br>
-    <p class="footer">
-        <b>v1.3</b>
         <br>
-        created by <a href="https://github.com/thiilo">thilo</a>, 2023.</p>
+        <p class="footer">
+            <b>v1.3</b>
+            <br>
+            created by <a href="https://github.com/thiilo">thilo</a>, 2023.
+        </p>
+    </div>
 </body>
 
 </html>
