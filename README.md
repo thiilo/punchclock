@@ -25,11 +25,13 @@ Icons are from [Phosphor Icons](https://phosphoricons.com/), the preffered font 
 As a personal project, `punchclock` is not too high on my agenda, but over time I'd like to add:
 
 - [x] keyboard shortcuts
+	- [ ] Help Dialogue
 - [ ] launcher
 	- [x] basic launcher
 	- [ ] project list, navigable by `↑` and `↓`.
-- [x] customized color schemes
-- [x] Editing
+ 	- [ ] autocomplete?
+- [ ] color schemes for each project
+- [x] editing
 	- [x] edit titles
 	- [x] edit time
 - [ ] nested projects (`work/project1` adds to `work` as well)
@@ -37,8 +39,9 @@ As a personal project, `punchclock` is not too high on my agenda, but over time 
 	- [ ] themes and theme colors
 	- [ ] custom shortcuts
 - [ ] a timing log that stores session lengths and enables deeper statistics
-- [ ] Deeper Statistics
+- [ ] deeper Statistics
 	- [ ] time spent daily, weekly, monthly
 	- [ ] project distribution
-- [ ] Exporting log files
+- [ ] exporting log files
 	- [ ] work report card
+- [ ]  favicon
