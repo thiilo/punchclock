@@ -217,6 +217,16 @@
         margin: 1.5em 0;
     }
 
+    .positive {
+        font-weight: bold;
+        color: chartreuse;
+    }
+
+    .negative {
+        font-weight: bold;
+        color: red;
+    }
+
     .footer {
         font-size: 7pt;
         text-align: center;
@@ -335,7 +345,20 @@
     function loadStats() {
         $("#statheader").html('<i class="ph-bold ph-chart-bar"></i>stats for ' + currentProject);
         $('#timesession').html(dateToString(parseInt(session[currentProject])) + " spent this session");
-        $('#timetotal').html(dateToString(parseInt(localStorage.getItem(currentProject))) + " spent in total");
+        if(currentProject.substring(0,4) == "work") {
+            $('#timetotal').html(calcDif(parseInt(localStorage.getItem(currentProject))));
+        } else {
+            $('#timetotal').html(dateToString(parseInt(localStorage.getItem(currentProject))) + " spent in total");
+        }
+    }
+
+    function calcDif(time) {
+        var dur = parseInt(currentProject.substring(10,12)) * 60 * 60 * 1000;
+        if (time < dur) {
+            return(dateToString(parseInt(localStorage.getItem(currentProject))) + " spent in total<br><p class='negative'>" + dateToString(dur - time) + " remaining</span>");
+        } else {
+           return(dateToString(parseInt(localStorage.getItem(currentProject))) + " spent in total<br><p class='positive'>" + dateToString(Math.abs(time - dur)) + " over</p>");
+        }
     }
 
     function loadProjects() {
@@ -545,7 +568,7 @@
         </div>
         <br>
         <p class="footer">
-            <b>v1.3</b>
+            <b>v1.3.2</b>
             <br>
             created by <a href="https://github.com/thiilo">thilo</a>, 2023.
         </p>
